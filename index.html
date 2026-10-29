@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vòng Quay May Mắn - Đông Anh</title>
+  <meta name="description" content="Hệ thống Vòng quay may mắn công nghệ tương lai với hiệu ứng khóa mục tiêu điện toán, radar hồi hộp đỉnh cao và đồ họa sân khấu đỉnh cao.">
+  
+  <!-- Top Vietnamese Fonts: Lexend & Roboto (100% chuẩn dấu hỏi, ngã, sắc, huyền, nặng) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800;900&family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+  
+  <!-- GSAP for smooth physics and transitions -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  
+  <!-- Canvas Confetti for winning celebration -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  
+  <!-- Custom Cyber Stage Styling with Cache-Buster -->
+  <link rel="stylesheet" href="style.css?v=16">
+</head>
+<body class="cyber-theme">
+  <!-- Interactive Mouse Trail Layer: Đông Anh Falling Chars -->
+  <div id="mouseTrailContainer" class="mouse-trail-container"></div>
+
+  <!-- Dynamic Cyber Grid & Quantum Particle Canvas Layer -->
+  <div class="backdrop-wrapper" id="backdropWrapper">
+    <!-- Optional Video Backdrop -->
+    <video id="bgVideo" class="bg-video" autoplay loop muted playsinline style="display: none;">
+      <source src="" type="video/mp4">
+    </video>
+    
+    <!-- Canvas Cyber Grid, Laser Light Streams & Particles -->
+    <canvas id="stageCanvas" class="stage-canvas"></canvas>
+    
+    <!-- Hologram scanlines & cyber grid floor effect -->
+    <div class="cyber-scanlines"></div>
+    <div class="cyber-grid-floor"></div>
+    <div class="stage-vignette"></div>
+    
+    <!-- Emergency / Tension Alarm Atmosphere during 5s Stop -->
+    <div class="tension-alarm-vignette" id="tensionAlarmVignette"></div>
+    <div class="stage-spotlight-beam" id="stageSpotlightBeam"></div>
+  </div>
+
+  <!-- High-Tech Cyber HUD Header -->
+  <header class="stage-header cyber-hud">
+    <!-- Brand / System Status -->
+    <div class="brand-group">
+      <div class="cyber-badge-status">
+        <span class="live-dot cyber-pulse"></span>
+        <span class="brand-tag">ĐÔNG ANH 5.0</span>
+      </div>
+      <div class="brand-title-wrap">
+        <h1 class="stage-title">LUCKY DRAW <span class="cyber-title-accent">ĐÔNG ANH</span></h1>
+      </div>
+    </div>
+
+    <!-- Active Prize Holographic HUD Banner -->
+    <div class="prize-pill cyber-prize-hud" id="currentPrizeBadge">
+      <div class="prize-bracket-left">[</div>
+      <div class="prize-content">
+        <span class="prize-label">HẠNG MỤC (NHẤP ĐỂ ĐỔI GIẢI)</span>
+        <span class="prize-name" id="currentPrizeName">GIẢI KHUYẾN KHÍCH (1/3)</span>
+      </div>
+      <div class="prize-bracket-right">]</div>
+      <div class="prize-glow-bar"></div>
+    </div>
+
+    <!-- Real-time Diagnostics & Tools -->
+    <div class="header-tools">
+      <div class="stat-badge cyber-stat" title="Số lượng ứng viên đang trực tuyến">
+        <span class="stat-label">CANDIDATES:</span>
+        <span class="stat-number" id="activeCount">0</span>
+      </div>
+
+      <div class="stat-badge cyber-stat history-stat" id="historyStatBtn" title="Xem danh sách trúng thưởng">
+        <span class="stat-label">WINNERS:</span>
+        <span class="stat-number gold-glow" id="historyCount">0</span>
+      </div>
+
+      <button id="btnSoundToggle" class="btn-cyber-icon" title="Bật/Tắt âm thanh (Phím M)">
+        <span id="soundIcon">🔊</span>
+      </button>
+
+      <button id="btnOpenHistory" class="btn-cyber-icon" title="Lịch sử trúng giải">
+        <span>📜</span>
+      </button>
+
+      <button id="btnOpenSettings" class="btn-cyber-icon" title="Cài đặt danh sách & tham số">
+        <span>⚙️</span>
+      </button>
+
+      <button id="btnFullscreen" class="btn-cyber-icon" title="Toàn màn hình trình chiếu (F11)">
+        <span>⛶</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Interactive Stage Arena where names are distributed -->
+  <main class="stage-area" id="stageArea">
+    <!-- Floating Cyber Countdown Watermark (Activates during 5s deceleration) -->
+    <div class="cyber-countdown-watermark" id="countdownWatermark">05.00</div>
+
+    <!-- High-Tech Target Lock Reticle (Replaces simple halo) -->
+    <div class="target-reticle" id="laserHalo">
+      <!-- Reticle corner brackets -->
+      <div class="reticle-corner reticle-tl"></div>
+      <div class="reticle-corner reticle-tr"></div>
+      <div class="reticle-corner reticle-bl"></div>
+      <div class="reticle-corner reticle-br"></div>
+      
+      <!-- Target Lock Status / Data Readout -->
+      <div class="reticle-status-badge">
+        <span class="reticle-spinner"></span>
+        <span class="reticle-status-text" id="reticleStatusText">LOCKING...</span>
+      </div>
+
+      <!-- Crosshairs & Rotating Rings -->
+      <div class="reticle-crosshair-h"></div>
+      <div class="reticle-crosshair-v"></div>
+      <div class="reticle-ring"></div>
+      <div class="reticle-glow-core"></div>
+    </div>
+
+    <!-- Container for all scattered names -->
+    <div class="names-container" id="namesContainer"></div>
+
+    <!-- Suspense Tension Meter & Heartbeat Waveform HUD -->
+    <div class="cyber-suspense-hud" id="suspenseMeter">
+      <div class="suspense-hud-header">
+        <span class="suspense-label">TENSION TELEMETRY</span>
+        <span class="suspense-percent" id="suspensePercent">0%</span>
+      </div>
+      <div class="meter-bar-track">
+        <div class="meter-bar" id="meterBar"></div>
+      </div>
+      <div class="tension-heartbeat-wave" id="heartbeatWave"></div>
+    </div>
+  </main>
+
+  <!-- Bottom Stage Futuristic Command Deck -->
+  <footer class="stage-footer cyber-footer">
+    <div class="controls-deck cyber-deck">
+      
+      <!-- Sub action button: Re-layout -->
+      <button id="btnRelayout" class="btn-cyber-sub" title="Sắp xếp lại vị trí ngẫu nhiên không đè nhau">
+        <span class="btn-sub-icon">🎲</span>
+        <span class="btn-sub-text">RAMDOM LẠI VỊ TRÍ</span>
+      </button>
+
+      <!-- Main Action Button (Arc Reactor / Cyber Core) -->
+      <button id="btnMainAction" class="btn-stage-action cyber-core-action btn-start">
+        <div class="core-outer-ring"></div>
+        <div class="core-energy-mesh"></div>
+        <div class="core-sweep-light"></div>
+        <div class="btn-content">
+          <span class="btn-icon-large" id="mainActionIcon">▶</span>
+          <span class="btn-label" id="mainActionLabel">BẮT ĐẦU QUAY</span>
+        </div>
+      </button>
+
+      <!-- Sub action button: Quick Add / Participants -->
+      <button id="btnQuickAdd" class="btn-cyber-sub" title="Thêm hoặc quản lý danh sách">
+        <span class="btn-sub-icon">📝</span>
+        <span class="btn-sub-text">DANH SÁCH</span>
+      </button>
+      
+    </div>
+  </footer>
+
+  <!-- ================= MODALS & SCI-FI OVERLAYS ================= -->
+
+  <!-- WINNER OVERLAY (GIAI ĐOẠN D - CÔNG BỐ NGƯỜI THẮNG) -->
+  <div class="winner-modal-backdrop" id="winnerOverlay">
+    <div class="winner-confetti-canvas-container">
+      <canvas id="fireworksCanvas"></canvas>
+    </div>
+
+    <!-- Holographic 3D Pedestal Card -->
+    <div class="winner-card cyber-winner-card" id="winnerCard">
+      <!-- Cyber Card Corner Tech Accents -->
+      <div class="card-tech-accent top-left"></div>
+      <div class="card-tech-accent top-right"></div>
+      <div class="card-tech-accent bottom-left"></div>
+      <div class="card-tech-accent bottom-right"></div>
+
+      <!-- Holographic rotating energy shields -->
+      <div class="winner-glow-burst"></div>
+      <div class="cyber-holo-rings"></div>
+      
+      <div class="winner-crown-wrapper">
+        <div class="winner-crown">👑</div>
+        <div class="crown-laser-flare"></div>
+      </div>
+      
+      <div class="winner-subtitle" id="winnerPrizeHeader">/// VICTORY CONFIRMED ///</div>
+      <div class="winner-prize-tag" id="winnerPrizeTag">GIẢI ĐẶC BIỆT</div>
+      
+      <!-- Hologram Name Display -->
+      <div class="winner-name-display cyber-holo-display" id="winnerNameDisplay">
+        <div class="holo-glitch-line"></div>
+        <span class="winner-text-inner" id="winnerText">NGUYỄN VĂN A</span>
+        <div class="holo-scan-reflection"></div>
+      </div>
+
+      <div class="winner-actions">
+        <button id="btnNextSpin" class="btn-winner-action cyber-btn-next">
+          <span class="btn-label">TIẾP TỤC QUAY ➜</span>
+          <div class="btn-laser-sweep"></div>
+        </button>
+        <button id="btnCloseWinner" class="btn-winner-action cyber-btn-dismiss">
+          <span>XEM SÂN KHẤU</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS MODAL: Edit Names & Prizes -->
+  <div class="drawer-overlay" id="settingsModal">
+    <div class="drawer-panel cyber-drawer">
+      <div class="drawer-header">
+        <div class="drawer-header-left">
+          <span class="cyber-dot-tag"></span>
+          <h2 class="drawer-title">TRUNG TÂM ĐIỀU KHIỂN & CÀI ĐẶT</h2>
+        </div>
+        <button class="btn-close-drawer cyber-close" id="btnCloseSettings">✕</button>
+      </div>
+
+      <div class="drawer-body">
+        <!-- Prize selector / management -->
+        <div class="form-group">
+          <label class="form-label cyber-label">DANH MỤC GIẢI THƯỞNG (3 KHUYẾN KHÍCH - 1 BA - 1 NHÌ - 1 NHẤT):</label>
+          <div class="prize-selector-grid" id="prizeSelectorGrid">
+            <button class="prize-chip cyber-chip active" data-prize="GIẢI KHUYẾN KHÍCH (1/3)">🎁 Giải Khuyến Khích (1/3)</button>
+            <button class="prize-chip cyber-chip" data-prize="GIẢI KHUYẾN KHÍCH (2/3)">🎁 Giải Khuyến Khích (2/3)</button>
+            <button class="prize-chip cyber-chip" data-prize="GIẢI KHUYẾN KHÍCH (3/3)">🎁 Giải Khuyến Khích (3/3)</button>
+            <button class="prize-chip cyber-chip" data-prize="GIẢI BA">🥉 Giải Ba</button>
+            <button class="prize-chip cyber-chip" data-prize="GIẢI NHÌ">🥈 Giải Nhì</button>
+            <button class="prize-chip cyber-chip" data-prize="GIẢI NHẤT">🥇 Giải Nhất</button>
+          </div>
+          <div class="custom-prize-input-row">
+            <input type="text" id="customPrizeInput" class="input-text cyber-input" placeholder="Hoặc nhập tên giải thưởng tùy chỉnh...">
+            <button id="btnApplyCustomPrize" class="btn-cyber-primary">Lưu Giải</button>
+          </div>
+        </div>
+
+        <!-- Participants input -->
+        <div class="form-group">
+          <div class="form-label-row">
+            <label class="form-label cyber-label">DANH SÁCH ỨNG VIÊN (1 tên / dòng):</label>
+            <span class="badge-count cyber-badge" id="textareaCountBadge">0 tên</span>
+          </div>
+          <textarea id="namesTextarea" class="input-textarea cyber-textarea" rows="10" placeholder="Nhập hoặc dán danh sách tên tại đây (mỗi tên một dòng)..."></textarea>
+          
+          <div class="presets-row">
+            <span class="presets-label">Dữ liệu mẫu:</span>
+            <button class="btn-pill cyber-pill" id="btnSample30">2 Tên Test</button>
+            <button class="btn-pill cyber-pill" id="btnSample60">12 Tên VIP</button>
+            <button class="btn-pill cyber-pill" id="btnSample100">30 Tên Hội Trường</button>
+            <button class="btn-pill btn-pill-danger cyber-pill" id="btnClearNames">Xóa trắng</button>
+          </div>
+        </div>
+
+        <!-- Visual & Sound Options -->
+        <div class="form-group">
+          <label class="form-label cyber-label">THÔNG SỐ HIỆU ỨNG SÂN KHẤU:</label>
+          <div class="checkbox-row">
+            <label class="custom-checkbox cyber-checkbox">
+              <input type="checkbox" id="chkAmbientFloating" checked>
+              <span>Hiệu ứng thở lơ lửng & viền năng lượng (Ambient Glow)</span>
+            </label>
+          </div>
+          <div class="checkbox-row">
+            <label class="custom-checkbox cyber-checkbox">
+              <input type="checkbox" id="chkBackgroundParticles" checked>
+              <span>Ma trận lưới Cyber & luồng hạt ánh sáng lượng tử</span>
+            </label>
+          </div>
+          <div class="checkbox-row">
+            <label class="custom-checkbox cyber-checkbox">
+              <input type="checkbox" id="chkSoundEffects" checked>
+              <span>Hệ thống âm thanh kịch tính & tim đập (Web Audio Synthesizer)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Custom Video Backdrop -->
+        <div class="form-group">
+          <label class="form-label cyber-label">VIDEO BACKDROP SÂN KHẤU (URL MP4 tùy chọn):</label>
+          <div class="custom-prize-input-row">
+            <input type="url" id="videoUrlInput" class="input-text cyber-input" placeholder="Dán link video MP4 (để trống nếu dùng nền Cyber Canvas)...">
+            <button id="btnApplyVideo" class="btn-cyber-primary">Áp dụng</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="drawer-footer">
+        <button id="btnApplySettings" class="btn-cyber-action w-full">
+          <span>✓ CẬP NHẬT BỐ CỤC & ÁP DỤNG</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- WINNERS HISTORY MODAL -->
+  <div class="drawer-overlay" id="historyModal">
+    <div class="drawer-panel cyber-drawer">
+      <div class="drawer-header">
+        <div class="drawer-header-left">
+          <span class="cyber-dot-tag gold"></span>
+          <h2 class="drawer-title">BẢNG VÀNG THẮNG CUỘC</h2>
+        </div>
+        <button class="btn-close-drawer cyber-close" id="btnCloseHistory">✕</button>
+      </div>
+
+      <div class="drawer-body">
+        <div class="history-list" id="historyList">
+          <div class="empty-history-notice">Chưa có ai trúng thưởng. Hãy kích hoạt vòng quay!</div>
+        </div>
+      </div>
+
+      <div class="drawer-footer history-footer">
+        <button id="btnExportHistory" class="btn-cyber-sub">
+          <span>📥 Tải File CSV</span>
+        </button>
+        <button id="btnResetHistory" class="btn-cyber-danger">
+          <span>🗑️ Xóa Lịch Sử</span>
+        </button>
+        <button id="btnResetAll" class="btn-cyber-sub" title="Khôi phục lại toàn bộ người trúng vào danh sách quay">
+          <span>🔄 Khôi Phục Tất Cả</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main scripts with cache-buster -->
+  <script src="spript.js?v=16"></script>
+  <script src="script.js?v=16"></script>
+</body>
+</html>
