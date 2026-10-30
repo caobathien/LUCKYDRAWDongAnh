@@ -172,6 +172,97 @@ class LuckyDrawEngine {
     // Nhạc vinh quang khi bấm nút Dừng
     this.vinhQuangAudio = new Audio('music/vinh%20quang.mp3');
     this.vinhQuangAudio.preload = 'auto';
+
+    // Nhạc nền từng hạng mục giải thưởng trước khi bấm quay
+    this.bgAudios = {
+      // Khuyến khích 1 & 2: Nhạc sổ số miền bắc.mp3
+      kk1_2: new Audio('music/Nh%E1%BA%A1c%20s%E1%BB%95%20s%E1%BB%91%20mi%E1%BB%81n%20b%E1%BA%AFc.mp3'),
+      // Khuyến khích 3: cầu cho trúng số.mp3
+      kk3: new Audio('music/c%E1%BA%A7u%20cho%20tr%C3%BAng%20s%E1%BB%91.mp3'),
+      // Giải 3: trúng số remix.mp3
+      giai3: new Audio('music/tr%C3%BAng%20s%E1%BB%91%20remix.mp3'),
+      // Giải nhì: cầu cho trúng số2.mp3
+      giai2: new Audio('music/c%E1%BA%A7u%20cho%20tr%C3%BAng%20s%E1%BB%912.mp3'),
+      // Giải nhất: quacamlamgiau.mp3
+      giaiNhat: new Audio('music/quacamlamgiau.mp3')
+    };
+
+    // Thiết lập thuộc tính cho toàn bộ nhạc nền
+    Object.values(this.bgAudios).forEach(audio => {
+      audio.preload = 'auto';
+      audio.loop = true; // Lặp lại nhạc nền khi chờ quay
+    });
+
+    this.currentBgAudio = null;
+    this.userInteracted = false;
+  }
+
+  // Lấy nhạc nền tương ứng với giải thưởng hiện tại
+  getBgAudioForCurrentPrize() {
+    const p = (this.currentPrize || '').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+    // Giải Khuyến khích 1 và 2: Nhạc sổ số miền bắc
+    if (p.includes('KHUYEN KHICH (1/3)') || p.includes('KHUYEN KHICH (2/3)') || p.includes('KK 1') || p.includes('KK 2') || p.includes('KK1') || p.includes('KK2')) {
+      return this.bgAudios.kk1_2;
+    }
+    // Giải Khuyến khích 3: Cầu cho trúng số 1
+    if (p.includes('KHUYEN KHICH (3/3)') || p.includes('KK 3') || p.includes('KK3')) {
+      return this.bgAudios.kk3;
+    }
+    // Nếu có chữ Khuyến khích chung chung: mặc định kk1_2
+    if (p.includes('KHUYEN KHICH')) {
+      return this.bgAudios.kk1_2;
+    }
+    // Giải Nhì: Cầu cho trúng số 2
+    if (p.includes('NHI') || p.includes('GIAI 2') || p.includes('GIAI NHI')) {
+      return this.bgAudios.giai2;
+    }
+    // Giải 3: Trúng số remix
+    if (p.includes('GIAI BA') || p.includes('GIAI 3') || p.includes('BA')) {
+      return this.bgAudios.giai3;
+    }
+    // Giải Nhất: quacamlamgiau
+    if (p.includes('NHAT') || p.includes('GIAI 1') || p.includes('GIAI NHAT') || p.includes('DAC BIET')) {
+      return this.bgAudios.giaiNhat;
+    }
+
+    return this.bgAudios.kk1_2;
+  }
+
+  // Phát nhạc nền trước khi quay
+  playBackgroundMusic() {
+    if (!this.soundEnabled || this.state !== 'idle') return;
+
+    const targetAudio = this.getBgAudioForCurrentPrize();
+
+    // Nếu đang phát bài khác thì dừng lại
+    if (this.currentBgAudio && this.currentBgAudio !== targetAudio) {
+      try {
+        this.currentBgAudio.pause();
+        this.currentBgAudio.currentTime = 0;
+      } catch (e) {}
+    }
+
+    this.currentBgAudio = targetAudio;
+    if (this.currentBgAudio) {
+      try {
+        const p = this.currentBgAudio.play();
+        if (p !== undefined) {
+          p.catch(() => {});
+        }
+      } catch (e) {}
+    }
+  }
+
+  // Dừng toàn bộ nhạc nền (khi bấm quay)
+  stopBackgroundMusic() {
+    Object.values(this.bgAudios).forEach(audio => {
+      try {
+        audio.pause();
+        audio.currentTime = 0;
+      } catch (e) {}
+    });
+    this.currentBgAudio = null;
   }
 
   playVinhQuangMusic() {
@@ -886,6 +977,7 @@ class LuckyDrawEngine {
 
     this.ensureAudioContext();
     this.stopVinhQuangMusic(); // Đảm bảo nhạc dừng nếu còn đang phát
+    this.stopBackgroundMusic(); // DỪNG NHẠC NỀN KHI BẤM BẮT ĐẦU QUAY
     this.state = 'spinning';
 
     // Update Action Button to "DỪNG LẠI"
@@ -920,12 +1012,6 @@ class LuckyDrawEngine {
     hop();
   }
 
-  /* -------------------------------------------------------------
-  /* -------------------------------------------------------------
-   * HELPER KIỂM TRA ĐIỀU KIỆN CAN THIỆP:
-   * 1. Nhận diện tên có chứa "Cao Tiểu Phương"
-   * 2. Nhận diện Hạng mục "Giải Nhì" (Giải 2)
-   * ----------------------------------------------------------- */
   isCaoTieuPhuong(name) {
     if (!name) return false;
     const clean = name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -972,10 +1058,8 @@ class LuckyDrawEngine {
     const caoIdx = this.participants.findIndex(p => this.isCaoTieuPhuong(p.name));
     if (ENABLE_CO_CAU_GIAI_NHI) {
       if (isGiaiNhi && caoIdx !== -1) {
-        // Giải Nhì: Chọn Cao Tiểu Phương
         winnerIndex = caoIdx;
       } else {
-        // Các giải khác: Loại trừ Cao Tiểu Phương
         const nonCaoIndices = [];
         this.participants.forEach((p, idx) => {
           if (!this.isCaoTieuPhuong(p.name)) nonCaoIndices.push(idx);
@@ -1305,6 +1389,11 @@ class LuckyDrawEngine {
         }
       });
     }
+
+    // Khi đổi giải thưởng ở trạng thái chờ quay (idle) và người dùng đã click tương tác -> Tự đổi bài tương ứng
+    if (this.state === 'idle' && this.userInteracted) {
+      this.playBackgroundMusic();
+    }
   }
 
   nextPrize() {
@@ -1326,6 +1415,11 @@ class LuckyDrawEngine {
     if (this.countdownWatermark) this.countdownWatermark.classList.remove('active');
     if (this.suspensePercent) this.suspensePercent.textContent = '0%';
     if (this.reticleStatusText) this.reticleStatusText.textContent = 'STANDBY';
+
+    // Bắt đầu phát lại nhạc nền của giải hiện tại khi về trạng thái chờ
+    if (this.userInteracted) {
+      this.playBackgroundMusic();
+    }
   }
 
   /* -------------------------------------------------------------
@@ -1675,6 +1769,18 @@ class LuckyDrawEngine {
         }
       }, 300);
     });
+    // Click vào màn hình để bắt đầu phát nhạc nền (cho giải hiện tại) nếu chưa phát
+    document.addEventListener('pointerdown', (e) => {
+      this.userInteracted = true;
+      this.ensureAudioContext();
+
+      // Nếu đang ở trạng thái chờ quay (idle) và chưa có nhạc nền nào phát -> phát ngay
+      if (this.state === 'idle' && this.soundEnabled) {
+        if (!this.currentBgAudio || this.currentBgAudio.paused) {
+          this.playBackgroundMusic();
+        }
+      }
+    });
   }
 
   toggleSound() {
@@ -1683,8 +1789,12 @@ class LuckyDrawEngine {
     this.btnSoundToggle.title = this.soundEnabled ? 'Tắt âm thanh (Phím M)' : 'Bật âm thanh (Phím M)';
     if (this.soundEnabled) {
       this.ensureAudioContext();
+      if (this.state === 'idle') {
+        this.playBackgroundMusic();
+      }
     } else {
       this.stopVinhQuangMusic();
+      this.stopBackgroundMusic();
     }
   }
 }
