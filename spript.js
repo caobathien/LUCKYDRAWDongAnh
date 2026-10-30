@@ -5,43 +5,76 @@
  * ====================================================================
  */
 
-// Default Sample Participants
-const SAMPLE_PARTICIPANTS_35 = [
-  "Cao Bá Thiên", "Cao Tiểu Phương",
-  "Hồ Thị Kỳ", "Lê Văn Đại Điền", "Anh Tuyến"
+// Official Participants List
+const SAMPLE_PARTICIPANTS_63 = [
+  "Mr. Lê Văn Đại Điền",
+  "Ms. Cao Tiểu Phương",
+  "Mr. Phạm Anh Tuyến",
+  "Mr. Cao Bá Thiên",
+  "Ms. Nguyễn Thuý Nga",
+  "Mr. Nguyễn Văn An",
+  "Ms. Nguyễn Phạm Như Ý",
+  "Ms. Phan Minh Tâm",
+  "Ms. Đào Nguyễn Mai Khanh",
+  "Mr. Nguyễn Minh Huy",
+  "Mr. Nguyễn Xuân Hiệp",
+  "Ms. Lê Bảo Uyên Phương",
+  "Ms. Nguyễn Ngọc Mai Thư",
+  "Ms. Trần Ngọc Khánh Vy",
+  "Mr. Sam",
+  "Mr. Adrian",
+  "Ms. Trần Phạm Thảo My",
+  "Ms. Nguyễn Thị Thu Hà",
+  "Ms. Hồ Thị Mai",
+  "Mr. Đặng Thanh Duy",
+  "Ms. Lương Ái Mỹ Tiên",
+  "Mr. Nguyễn Ngọc Hoàng Phúc",
+  "Ms. Nguyễn Ngọc Bảo Châu",
+  "Ms. Bùi Thị Thanh Hằng",
+  "Ms. Thân Trọng Hoàng Gia",
+  "Ms. Lý Tuyết Xuân",
+  "Mr. Nguyễn Hoàng Phúc",
+  "Mr. Trần Huy Cường",
+  "Mr. Nguyễn Phúc Huy",
+  "Mr . Trần Hoàng Vũ",
+  "Ms. Phạm Lê Vân Anh",
+  "Mr Trương Hùng Việt",
+  "Ms. Võ Thụy Mai Huỳnh",
+  "Mr. Huỳnh Tiến Phát",
+  "Ms. Phạm Lê Phương Ngọc",
+  "Mr. Ramil Angeles",
+  "Mr. Lâm Tấn Văn",
+  "Ms. Nguyễn Thị Hoa",
+  "Hồ Thị Kỳ",
+  "Nguyễn Xuân Hoà",
+  "Nguyễn Phúc Nguyên",
+  "Nguyễn Phúc Tâm Như",
+  "Dương Vĩnh Bình Minh",
+  "Phạm Ngọc Tú",
+  "Bùi Minh Phán",
+  "Lê Kim Hoàng",
+  "Ms. Trương Thị Minh Duyên",
+  "Mrs. Võ Thị Ngọc Giàu",
+  "Hoàng Hải Đăng",
+  "Ms.Nguyễn Thị Thu Hằng",
+  "Ms.Huỳnh Thanh Trúc",
+  "Ms Nguyễn Thị Mai Lý",
+  "Mr Lưu Kim Nghĩ",
+  "Võ Thị Ninh GV",
+  "Hy Nguyễn Thanh Vân GV",
+  "Nguyễn Thị Phương Uyên",
+  "Nguyễn Thị Thu Hiền GV",
+  "Phạm Thu Thảo GV",
+  "Trần Thị Cẩm Hướng GV",
+  "Huỳnh Thu Thảo GX",
+  "Huỳnh Thị Cẩm Tú GX",
+  "Ph Phạm Minh Tân",
+  "Võ Thị Diễm GX"
 ];
 
-const SAMPLE_PARTICIPANTS_65 = [
-  ...SAMPLE_PARTICIPANTS_35,
-  "Hoàng Gia Bảo", "Bùi Mai Hương", "Đặng Quốc Anh", "Ngô Thanh Vân",
-  "Nguyễn Văn An", "Trần Thị Bích", "Lê Hoàng Nam", "Phạm Thu Hà",
-  "Đỗ Minh Tuấn", "Vũ Khánh Vy", "Dương Đình Trọng", "Lý Hải Yến",
-  "Trịnh Công Sơn", "Phan Anh Tuấn", "Võ Mỹ Duyên", "Hồ Ngọc Hà",
-  "Cao Thái Sơn", "Mai Phương Thúy", "Lương Bích Hữu", "Tô Hoài Nam",
-  "Nguyễn Hữu Thắng", "Trần Đình Trọng", "Phạm Đức Huy", "Đỗ Duy Mạnh",
-  "Đoàn Văn Hậu", "Nguyễn Quang Hải", "Nguyễn Công Phượng", "Nguyễn Văn Toàn",
-  "Phan Văn Đức", "Hà Đức Chinh", "Bùi Tiến Dũng", "Nguyễn Tuấn Anh",
-  "Lương Xuân Trường", "Vũ Văn Thanh", "Nguyễn Phong Hồng Duy", "Quế Ngọc Hải",
-  "Nguyễn Thành Chung", "Bùi Hoàng Việt Anh", "Nguyễn Thanh Bình", "Đặng Văn Lâm",
-  "Nguyễn Tiến Linh", "Phạm Tuấn Hải", "Nhâm Mạnh Dũng", "Khuất Văn Khang",
-  "Phan Tuấn Tài", "Nguyễn Thái Sơn", "Võ Minh Trọng", "Nguyễn Đình Bắc",
-  "Hồ Văn Cường", "Giáp Tuấn Dương", "Trần Ngọc Sơn", "Lê Phạm Thành Long",
-  "Trương Tiến Anh", "Nguyễn Đức Chiến", "Triệu Việt Hưng", "Lê Văn Đô",
-  "Nguyễn Thanh Nhân", "Huỳnh Công Đến", "Lê Minh Bình", "Nguyễn Hữu Khôi"
-];
-
-const SAMPLE_PARTICIPANTS_100 = [
-  ...SAMPLE_PARTICIPANTS_65,
-  "Đinh Thanh Bình", "Nguyễn Trọng Hoàng", "Nguyễn Anh Đức", "Lê Công Vinh",
-  "Phạm Văn Quyến", "Lê Huỳnh Đức", "Nguyễn Hồng Sơn", "Trần Công Minh",
-  "Đỗ Khải", "Vũ Như Thành", "Dương Hồng Sơn", "Nguyễn Minh Phương",
-  "Phan Văn Tài Em", "Nguyễn Việt Thắng", "Huỳnh Quang Thanh", "Lê Tấn Tài",
-  "Vũ Phong", "Phan Thanh Hưng", "Đinh Hoàng Max", "Huỳnh Kesley Alves",
-  "Nguyễn Rogerio", "Hoàng Vũ Samson", "Đặng Văn Robert", "Michal Nguyễn",
-  "Mạc Hồng Quân", "Adriano Schmidt", "Filip Nguyễn", "Patrik Lê Giang",
-  "Đỗ Merlo", "Lê Văn Thắng", "Trần Đình Hoàng", "Hoàng Đình Tùng",
-  "Vũ Minh Tuấn", "Nguyễn Huy Hùng", "Võ Huy Toàn", "Hồ Tuấn Tài"
-];
+const SAMPLE_PARTICIPANTS_35 = SAMPLE_PARTICIPANTS_63;
+const SAMPLE_PARTICIPANTS_65 = SAMPLE_PARTICIPANTS_63;
+const SAMPLE_PARTICIPANTS_100 = SAMPLE_PARTICIPANTS_63;
 
 class LuckyDrawEngine {
   constructor() {
@@ -84,8 +117,8 @@ class LuckyDrawEngine {
     // Interactive Mouse Trail ("Đông Anh")
     this.initMouseTrail();
 
-    // Initialize with default 35 participants
-    this.loadParticipants(SAMPLE_PARTICIPANTS_35);
+    // Initialize with official 63 participants
+    this.loadParticipants(SAMPLE_PARTICIPANTS_63);
   }
 
   /* -------------------------------------------------------------
@@ -1664,18 +1697,24 @@ class LuckyDrawEngine {
     });
 
     // Preset buttons
-    this.btnSample30.addEventListener('click', () => {
-      this.namesTextarea.value = SAMPLE_PARTICIPANTS_35.join('\n');
-      this.updateTextareaBadge();
-    });
-    this.btnSample60.addEventListener('click', () => {
-      this.namesTextarea.value = SAMPLE_PARTICIPANTS_65.join('\n');
-      this.updateTextareaBadge();
-    });
-    this.btnSample100.addEventListener('click', () => {
-      this.namesTextarea.value = SAMPLE_PARTICIPANTS_100.join('\n');
-      this.updateTextareaBadge();
-    });
+    if (this.btnSample30) {
+      this.btnSample30.addEventListener('click', () => {
+        this.namesTextarea.value = SAMPLE_PARTICIPANTS_63.join('\n');
+        this.updateTextareaBadge();
+      });
+    }
+    if (this.btnSample60) {
+      this.btnSample60.addEventListener('click', () => {
+        this.namesTextarea.value = SAMPLE_PARTICIPANTS_63.join('\n');
+        this.updateTextareaBadge();
+      });
+    }
+    if (this.btnSample100) {
+      this.btnSample100.addEventListener('click', () => {
+        this.namesTextarea.value = SAMPLE_PARTICIPANTS_63.join('\n');
+        this.updateTextareaBadge();
+      });
+    }
     this.btnClearNames.addEventListener('click', () => {
       this.namesTextarea.value = '';
       this.updateTextareaBadge();
