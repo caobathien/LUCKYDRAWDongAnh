@@ -229,9 +229,9 @@ class LuckyDrawEngine {
     return this.bgAudios.kk1_2;
   }
 
-  // Phát nhạc nền trước khi quay
+  // Phát nhạc nền (chạy suốt từ lúc chờ quay và trong lúc quay, chỉ dừng khi bấm Dừng)
   playBackgroundMusic() {
-    if (!this.soundEnabled || this.state !== 'idle') return;
+    if (!this.soundEnabled || (this.state !== 'idle' && this.state !== 'spinning')) return;
 
     const targetAudio = this.getBgAudioForCurrentPrize();
 
@@ -977,7 +977,10 @@ class LuckyDrawEngine {
 
     this.ensureAudioContext();
     this.stopVinhQuangMusic(); // Đảm bảo nhạc dừng nếu còn đang phát
-    this.stopBackgroundMusic(); // DỪNG NHẠC NỀN KHI BẤM BẮT ĐẦU QUAY
+    // Nhạc nền TIẾP TỤC CHẠY SUỐT trong lúc quay, chỉ dừng khi bấm Dừng
+    if (this.soundEnabled) {
+      this.playBackgroundMusic();
+    }
     this.state = 'spinning';
 
     // Update Action Button to "DỪNG LẠI"
@@ -1037,6 +1040,9 @@ class LuckyDrawEngine {
     this.btnMainAction.disabled = true;
     this.mainActionIcon.textContent = '⏳';
     this.suspenseMeter.classList.add('active');
+
+    // Dừng nhạc nền giải thưởng khi bấm Dừng
+    this.stopBackgroundMusic();
 
     // Phát nhạc vinh quang khi bấm nút Dừng
     this.playVinhQuangMusic();
@@ -1774,8 +1780,8 @@ class LuckyDrawEngine {
       this.userInteracted = true;
       this.ensureAudioContext();
 
-      // Nếu đang ở trạng thái chờ quay (idle) và chưa có nhạc nền nào phát -> phát ngay
-      if (this.state === 'idle' && this.soundEnabled) {
+      // Nếu đang ở trạng thái chờ quay (idle) hoặc đang quay (spinning) và chưa có nhạc nền nào phát -> phát ngay
+      if ((this.state === 'idle' || this.state === 'spinning') && this.soundEnabled) {
         if (!this.currentBgAudio || this.currentBgAudio.paused) {
           this.playBackgroundMusic();
         }
