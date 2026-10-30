@@ -164,10 +164,37 @@ class LuckyDrawEngine {
   }
 
   /* -------------------------------------------------------------
-   * WEB AUDIO SYNTHESIZER (ZERO EXTERNAL MP3 DEPENDENCY)
+   * WEB AUDIO SYNTHESIZER & MP3 SOUNDTRACK CONTROLLER
    * ----------------------------------------------------------- */
   initAudioEngine() {
     this.audioCtx = null;
+
+    // Nhạc vinh quang khi bấm nút Dừng
+    this.vinhQuangAudio = new Audio('music/vinh%20quang.mp3');
+    this.vinhQuangAudio.preload = 'auto';
+  }
+
+  playVinhQuangMusic() {
+    if (!this.soundEnabled || !this.vinhQuangAudio) return;
+    try {
+      this.vinhQuangAudio.currentTime = 0;
+      const playPromise = this.vinhQuangAudio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          // Autoplay policy or interaction restriction
+        });
+      }
+    } catch (e) {
+      console.warn("Không thể phát nhạc vinh quang:", e);
+    }
+  }
+
+  stopVinhQuangMusic() {
+    if (!this.vinhQuangAudio) return;
+    try {
+      this.vinhQuangAudio.pause();
+      this.vinhQuangAudio.currentTime = 0;
+    } catch (e) {}
   }
 
   ensureAudioContext() {
@@ -858,6 +885,7 @@ class LuckyDrawEngine {
     }
 
     this.ensureAudioContext();
+    this.stopVinhQuangMusic(); // Đảm bảo nhạc dừng nếu còn đang phát
     this.state = 'spinning';
 
     // Update Action Button to "DỪNG LẠI"
@@ -923,6 +951,9 @@ class LuckyDrawEngine {
     this.btnMainAction.disabled = true;
     this.mainActionIcon.textContent = '⏳';
     this.suspenseMeter.classList.add('active');
+
+    // Phát nhạc vinh quang khi bấm nút Dừng
+    this.playVinhQuangMusic();
 
     // Trigger tension alarm vignette and giant cyber watermark
     if (this.tensionAlarmVignette) this.tensionAlarmVignette.classList.add('active');
@@ -1214,6 +1245,9 @@ class LuckyDrawEngine {
    * - Các tên còn lại GIỮ NGUYÊN vị trí (không nhảy lung tung)
    * ----------------------------------------------------------- */
   nextSpin() {
+    // Dừng nhạc vinh quang khi bấm TIẾP TỤC QUAY
+    this.stopVinhQuangMusic();
+
     // Ẩn modal người thắng
     this.winnerOverlay.classList.remove('show');
     this.namesContainer.classList.remove('dim-all');
@@ -1647,7 +1681,11 @@ class LuckyDrawEngine {
     this.soundEnabled = !this.soundEnabled;
     this.soundIcon.textContent = this.soundEnabled ? '🔊' : '🔇';
     this.btnSoundToggle.title = this.soundEnabled ? 'Tắt âm thanh (Phím M)' : 'Bật âm thanh (Phím M)';
-    if (this.soundEnabled) this.ensureAudioContext();
+    if (this.soundEnabled) {
+      this.ensureAudioContext();
+    } else {
+      this.stopVinhQuangMusic();
+    }
   }
 }
 
