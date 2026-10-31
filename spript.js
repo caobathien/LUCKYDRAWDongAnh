@@ -208,8 +208,10 @@ class LuckyDrawEngine {
 
     // Nhạc nền từng hạng mục giải thưởng trước khi bấm quay
     this.bgAudios = {
-      // Khuyến khích 1 & 2: Nhạc sổ số miền bắc.mp3
-      kk1_2: new Audio('music/Nh%E1%BA%A1c%20s%E1%BB%95%20s%E1%BB%91%20mi%E1%BB%81n%20b%E1%BA%AFc.mp3'),
+      // Khuyến khích 1: Nhạc sổ số miền bắc.mp3
+      kk1: new Audio('music/Nh%E1%BA%A1c%20s%E1%BB%95%20s%E1%BB%91%20mi%E1%BB%81n%20b%E1%BA%AFc.mp3'),
+      // Khuyến khích 2: TamKa PKL - Bài ca tuổi trẻ.mp3
+      kk2: new Audio('music/TamKa%20PKL%20-%20B%C3%A0i%20ca%20tu%E1%BB%95i%20tr%E1%BA%BB.mp3'),
       // Khuyến khích 3: cầu cho trúng số.mp3
       kk3: new Audio('music/c%E1%BA%A7u%20cho%20tr%C3%BAng%20s%E1%BB%91.mp3'),
       // Giải 3: trúng số remix.mp3
@@ -234,17 +236,21 @@ class LuckyDrawEngine {
   getBgAudioForCurrentPrize() {
     const p = (this.currentPrize || '').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
-    // Giải Khuyến khích 1 và 2: Nhạc sổ số miền bắc
-    if (p.includes('KHUYEN KHICH (1/3)') || p.includes('KHUYEN KHICH (2/3)') || p.includes('KK 1') || p.includes('KK 2') || p.includes('KK1') || p.includes('KK2')) {
-      return this.bgAudios.kk1_2;
+    // Giải Khuyến khích 1: Nhạc sổ số miền bắc
+    if (p.includes('KHUYEN KHICH (1/3)') || p.includes('KK 1') || p.includes('KK1') || p.includes('1/3')) {
+      return this.bgAudios.kk1;
+    }
+    // Giải Khuyến khích 2: TamKa PKL - Bài ca tuổi trẻ
+    if (p.includes('KHUYEN KHICH (2/3)') || p.includes('KK 2') || p.includes('KK2') || p.includes('2/3')) {
+      return this.bgAudios.kk2;
     }
     // Giải Khuyến khích 3: Cầu cho trúng số 1
-    if (p.includes('KHUYEN KHICH (3/3)') || p.includes('KK 3') || p.includes('KK3')) {
+    if (p.includes('KHUYEN KHICH (3/3)') || p.includes('KK 3') || p.includes('KK3') || p.includes('3/3')) {
       return this.bgAudios.kk3;
     }
-    // Nếu có chữ Khuyến khích chung chung: mặc định kk1_2
+    // Nếu có chữ Khuyến khích chung chung: mặc định kk1
     if (p.includes('KHUYEN KHICH')) {
-      return this.bgAudios.kk1_2;
+      return this.bgAudios.kk1;
     }
     // Giải Nhì: Cầu cho trúng số 2
     if (p.includes('NHI') || p.includes('GIAI 2') || p.includes('GIAI NHI')) {
@@ -259,7 +265,7 @@ class LuckyDrawEngine {
       return this.bgAudios.giaiNhat;
     }
 
-    return this.bgAudios.kk1_2;
+    return this.bgAudios.kk1;
   }
 
   // Phát nhạc nền (chạy suốt từ lúc chờ quay và trong lúc quay, chỉ dừng khi bấm Dừng)
