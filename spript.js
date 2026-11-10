@@ -1039,8 +1039,6 @@ class LuckyDrawEngine {
         }
       }
     }
-
-    // Animate initial entry with subtle GSAP stagger
     gsap.fromTo(
       '.name-pill',
       { opacity: 0, scale: 0.8 },
@@ -1154,7 +1152,6 @@ class LuckyDrawEngine {
       this.countdownWatermark.classList.add('active');
       this.countdownWatermark.textContent = '05.00';
     }
-    //thay thế ở đây
     const ENABLE_CO_CAU_GIAI_NHI = false;
     const teacherIndices = [];
     this.participants.forEach((p, idx) => {
@@ -1251,7 +1248,7 @@ class LuckyDrawEngine {
         for (let s = 0; s < totalSteps; s++) finalSequence.push(caoIdx);
       }
     } else {
-      // Chuỗi bình thường (chuẩn suspense cho các giải và khi tắt can thiệp)
+      // Lộ trình suspense chuẩn
       const candidatesWithDistance = this.participants
         .map((p, idx) => {
           const dx = (p.x + p.width / 2) - (this.chosenWinner.x + this.chosenWinner.width / 2);
