@@ -66,7 +66,17 @@ const SAMPLE_PARTICIPANTS_63 = [
   "Ms. Võ Thị Diễm",
   "Ms. Huỳnh Thị Cẩm Tú",
   "Ms. Nguyễn Thị Thu Hiền",
-  "Ms. Phạm Thu Thảo"
+  "Ms. Phạm Thu Thảo",
+  "Ms. Nguyễn Thị Hường",
+  "Ms. Hoàng Thị Linh Uyên",
+  "Mr. Nguyễn Mạnh Sơn",
+  "Mr. Võ Thanh Tùng",
+  "Mr. Phan Hoàng Việt",
+  "Mr. Huỳnh Vỹ Lạc",
+  "Mr. Nguyễn Trí Dũng",
+  "Ms. Trương Thị Loan",
+  "Ms. Nguyễn Hồng Thắm",
+  "Ms. Nguyễn Thị Hồng Hảo"
 ];
 
 const SAMPLE_PARTICIPANTS_35 = SAMPLE_PARTICIPANTS_63;
