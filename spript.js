@@ -6,6 +6,57 @@
  */
 
 /// Official Participants List (59 Participants verified from 6 images)
+// Dòng 10 - 44: Nhóm Giáo viên (35 người)
+// Dòng 45 trở đi: Nhóm Khách mời (34 người)
+const TEACHER_PARTICIPANTS = [
+  "Mr. Lê Văn Đại Điền",
+  "Ms. Cao Tiểu Phương",
+  "Mr. Phạm Anh Tuyến",
+  "Mr. Cao Bá Thiên",
+  "Mr. Nguyễn Văn An",
+  "Ms. Nguyễn Phạm Như Ý",
+  "Ms. Phan Minh Tâm",
+  "Ms. Đào Nguyễn Mai Khanh",
+  "Mr. Nguyễn Minh Huy",
+  "Mr. Nguyễn Xuân Hiệp",
+  "Ms. Lê Bảo Uyên Phương",
+  "Ms. Nguyễn Ngọc Mai Thư",
+  "Ms. Trần Ngọc Khánh Vy",
+  "Mr. Sam",
+  "Mr. Adrian",
+  "Ms. Nguyễn Thuý Nga",
+  "Ms. Trần Phạm Thảo My",
+  "Ms. Nguyễn Thị Thu Hà",
+  "Ms. Hồ Thị Mai",
+  "Mr. Đặng Thanh Duy",
+  "Ms. Lương Ái Mỹ Tiên",
+  "Mr. Nguyễn Ngọc Hoàng Phúc",
+  "Ms. Nguyễn Ngọc Bảo Châu",
+  "Ms. Bùi Thị Thanh Hằng",
+  "Ms. Thân Trọng Hoàng Gia",
+  "Ms. Lý Tuyết Xuân",
+  "Mr. Nguyễn Hoàng Phúc",
+  "Mr. Trần Huy Cường",
+  "Mr. Nguyễn Phúc Huy",
+  "Mr. Trần Hoàng Vũ",
+  "Ms. Phạm Lê Vân Anh",
+  "Mr. Trương Hùng Việt",
+  "Ms. Võ Thụy Mai Huỳnh",
+  "Mr. Huỳnh Tiến Phát",
+  "Mr. Ramil Angeles"
+];
+
+function normalizeVietnameseName(name) {
+  if (!name) return '';
+  return name.toString().toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/[^a-z0-9]/g, '');
+}
+
+const TEACHER_NAMES_SET = new Set(TEACHER_PARTICIPANTS.map(normalizeVietnameseName));
+
 const SAMPLE_PARTICIPANTS_63 = [
   "Mr. Lê Văn Đại Điền",
   "Ms. Cao Tiểu Phương",
@@ -61,7 +112,6 @@ const SAMPLE_PARTICIPANTS_63 = [
   "Ms. Nguyễn Thị Phương Uyên",
   "Ms. Huỳnh Thu Thảo",
   "Ms. Nguyễn Thị Thuý Cẩm",
-  "Ms. Đỗ Thị Tân",
   "Ms. Trần Thị Nguỳ",
   "Ms. Võ Thị Diễm",
   "Ms. Huỳnh Thị Cẩm Tú",
@@ -1061,6 +1111,11 @@ class LuckyDrawEngine {
     hop();
   }
 
+  isTeacher(name) {
+    if (!name) return false;
+    return TEACHER_NAMES_SET.has(normalizeVietnameseName(name));
+  }
+
   isCaoTieuPhuong(name) {
     if (!name) return false;
     const clean = name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -1099,32 +1154,50 @@ class LuckyDrawEngine {
       this.countdownWatermark.classList.add('active');
       this.countdownWatermark.textContent = '05.00';
     }
-
-    // Công tắc cơ cấu: ĐÃ BẬT (true)
-    const ENABLE_CO_CAU_GIAI_NHI = false; 
-
-    // BƯỚC 1: Chọn sẵn người thắng ngẫu nhiên (CODE CŨ NGUYÊN BẢN)
-    let winnerIndex = Math.floor(Math.random() * this.participants.length);
+    //thay thế ở đây
+    const ENABLE_CO_CAU_GIAI_NHI = false;
+    const teacherIndices = [];
+    this.participants.forEach((p, idx) => {
+      if (this.isTeacher(p.name)) {
+        teacherIndices.push(idx);
+      }
+    });
 
     const isGiaiNhi = this.isPrizeGiaiNhi(this.currentPrize);
     const caoIdx = this.participants.findIndex(p => this.isCaoTieuPhuong(p.name));
+
+    let winnerIndex;
+
     if (ENABLE_CO_CAU_GIAI_NHI) {
       if (isGiaiNhi && caoIdx !== -1) {
         winnerIndex = caoIdx;
       } else {
-        const nonCaoIndices = [];
-        this.participants.forEach((p, idx) => {
-          if (!this.isCaoTieuPhuong(p.name)) nonCaoIndices.push(idx);
-        });
-        if (nonCaoIndices.length > 0) {
-          winnerIndex = nonCaoIndices[Math.floor(Math.random() * nonCaoIndices.length)];
+        const nonCaoTeachers = teacherIndices.filter(idx => idx !== caoIdx);
+        if (nonCaoTeachers.length > 0) {
+          winnerIndex = nonCaoTeachers[Math.floor(Math.random() * nonCaoTeachers.length)];
+        } else {
+          const nonCaoIndices = [];
+          this.participants.forEach((p, idx) => {
+            if (idx !== caoIdx) nonCaoIndices.push(idx);
+          });
+          if (nonCaoIndices.length > 0) {
+            winnerIndex = nonCaoIndices[Math.floor(Math.random() * nonCaoIndices.length)];
+          } else {
+            winnerIndex = caoIdx;
+          }
         }
+      }
+    } else {
+      if (teacherIndices.length > 0) {
+        winnerIndex = teacherIndices[Math.floor(Math.random() * teacherIndices.length)];
+      } else {
+        winnerIndex = Math.floor(Math.random() * this.participants.length);
       }
     }
 
     this.chosenWinner = this.participants[winnerIndex];
 
-    // BƯỚC 2: Thiết lập chuỗi delay chuẩn xác 5.0s (CODE CŨ NGUYÊN BẢN)
+    // BƯỚC 2: Thiết lập chuỗi delay chuẩn xác 5.0s
     let delaySteps = [
       80, 80, 85, 90, 95, 100, 110, 120, 135, 150,
       170, 195, 225, 260, 305, 360, 430, 520, 650, 840
@@ -1149,6 +1222,7 @@ class LuckyDrawEngine {
     const finalSequence = [];
     let lastIdx = this.currentBeamIndex;
 
+    // BƯỚC 3: Xây dựng lộ trình nhảy kịch tính trong 5 giây giảm tốc
     if (ENABLE_CO_CAU_GIAI_NHI && isGiaiNhi && caoIdx !== -1) {
       const otherIndices = [];
       this.participants.forEach((p, idx) => {
@@ -1159,7 +1233,7 @@ class LuckyDrawEngine {
         const subRival = otherIndices[1] ?? rivalIdx;
         for (let s = 0; s < totalSteps; s++) {
           if (s === totalSteps - 1) {
-            finalSequence.push(caoIdx); // 0.1s cuối cùng phóng sang Cao Tiểu Phương
+            finalSequence.push(caoIdx);
           } else if (s === totalSteps - 2) {
             finalSequence.push(rivalIdx);
           } else if (s === totalSteps - 3) {
@@ -1177,59 +1251,62 @@ class LuckyDrawEngine {
         for (let s = 0; s < totalSteps; s++) finalSequence.push(caoIdx);
       }
     } else {
+      // Chuỗi bình thường (chuẩn suspense cho các giải và khi tắt can thiệp)
+      const candidatesWithDistance = this.participants
+        .map((p, idx) => {
+          const dx = (p.x + p.width / 2) - (this.chosenWinner.x + this.chosenWinner.width / 2);
+          const dy = (p.y + p.height / 2) - (this.chosenWinner.y + this.chosenWinner.height / 2);
+          return { index: idx, dist: Math.sqrt(dx * dx + dy * dy) };
+        })
+        .filter(item => item.index !== winnerIndex)
+        .sort((a, b) => a.dist - b.dist);
 
-    // BƯỚC 3: Xây dựng lộ trình tên (CODE CŨ NGUYÊN BẢN CHẠY MẶC ĐỊNH)
-    const candidatesWithDistance = this.participants
-      .map((p, idx) => {
-        const dx = (p.x + p.width / 2) - (this.chosenWinner.x + this.chosenWinner.width / 2);
-        const dy = (p.y + p.height / 2) - (this.chosenWinner.y + this.chosenWinner.height / 2);
-        return { index: idx, dist: Math.sqrt(dx * dx + dy * dy) };
-      })
-      .filter(item => item.index !== winnerIndex)
-      .sort((a, b) => a.dist - b.dist);
-
-    for (let s = 0; s < totalSteps; s++) {
-      if (s === totalSteps - 1) {
-        finalSequence.push(winnerIndex);
-      } else if (this.participants.length === 1) {
-        finalSequence.push(0);
-      } else if (this.participants.length === 2) {
-        const otherIndex = (winnerIndex === 0) ? 1 : 0;
-        const stepsFromEnd = (totalSteps - 1) - s;
-        if (stepsFromEnd % 2 === 0) {
+      for (let s = 0; s < totalSteps; s++) {
+        if (s === totalSteps - 1) {
+          // Nhịp cuối cùng đúng 5.0s: Chốt trúng chính xác người chiến thắng
           finalSequence.push(winnerIndex);
+        } else if (this.participants.length === 1) {
+          finalSequence.push(0);
+        } else if (this.participants.length === 2) {
+          const otherIndex = (winnerIndex === 0) ? 1 : 0;
+          const stepsFromEnd = (totalSteps - 1) - s;
+          if (stepsFromEnd % 2 === 0) {
+            finalSequence.push(winnerIndex);
+          } else {
+            finalSequence.push(otherIndex);
+          }
         } else {
-          finalSequence.push(otherIndex);
-        }
-      } else {
-        if (s < 13) {
-          let nextIdx;
-          do {
-            nextIdx = Math.floor(Math.random() * this.participants.length);
-          } while (nextIdx === lastIdx && this.participants.length > 1);
-          finalSequence.push(nextIdx);
-          lastIdx = nextIdx;
-        } else if (s < 17) {
-          const pool = [
-            winnerIndex,
-            ...candidatesWithDistance.slice(0, 3).map(c => c.index)
-          ];
-          let nextIdx;
-          do {
-            nextIdx = pool[Math.floor(Math.random() * pool.length)];
-          } while (nextIdx === lastIdx && pool.length > 1);
-          finalSequence.push(nextIdx);
-          lastIdx = nextIdx;
-        } else if (s === totalSteps - 3) {
-          const idx = candidatesWithDistance[1]?.index ?? candidatesWithDistance[0]?.index ?? winnerIndex;
-          finalSequence.push(idx);
-        } else if (s === totalSteps - 2) {
-          const idx = candidatesWithDistance[0]?.index ?? (winnerIndex === 0 ? 1 : 0);
-          finalSequence.push(idx);
+          if (s < 13) {
+            // Các bước đầu giảm tốc: nhảy ngẫu nhiên trên toàn bộ người tham gia (cả giáo viên và khách mời)
+            let nextIdx;
+            do {
+              nextIdx = Math.floor(Math.random() * this.participants.length);
+            } while (nextIdx === lastIdx && this.participants.length > 1);
+            finalSequence.push(nextIdx);
+            lastIdx = nextIdx;
+          } else if (s < 17) {
+            // Gần đích: nhảy qua lại giữa người thắng và các mục tiêu lân cận
+            const pool = [
+              winnerIndex,
+              ...candidatesWithDistance.slice(0, 3).map(c => c.index)
+            ];
+            let nextIdx;
+            do {
+              nextIdx = pool[Math.floor(Math.random() * pool.length)];
+            } while (nextIdx === lastIdx && pool.length > 1);
+            finalSequence.push(nextIdx);
+            lastIdx = nextIdx;
+          } else if (s === totalSteps - 3) {
+            const idx = candidatesWithDistance[1]?.index ?? candidatesWithDistance[0]?.index ?? winnerIndex;
+            finalSequence.push(idx);
+          } else if (s === totalSteps - 2) {
+            // Nhịp sát nút (Near-miss): dừng ở người bên cạnh tạo cảm giác nghẹt thở trước khi khóa đích
+            const idx = candidatesWithDistance[0]?.index ?? (winnerIndex === 0 ? 1 : 0);
+            finalSequence.push(idx);
+          }
         }
       }
     }
-    } // Kết thúc khối cơ cấu
 
     // Đếm ngược 5 giây trực quan trên nút điều khiển & watermark
     const startTime = Date.now();
