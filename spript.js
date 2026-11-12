@@ -104,7 +104,7 @@ const SAMPLE_PARTICIPANTS_63 = [
   "Mr. Phạm Ngọc Tú",
   "Mr. Lê Kim Hoàng",
   "Ms. Trương Thị Minh Duyên",
-  "Mrs. Võ Thị Ngọc Giàu",
+  "Ms. Võ Thị Ngọc Giàu",
   "Ms. Hoàng Hải Đăng",
   "Ms. Nguyễn Thị Thu Hằng",
   "Ms. Huỳnh Thanh Trúc",
@@ -125,11 +125,13 @@ const SAMPLE_PARTICIPANTS_63 = [
   "Mr. Nguyễn Mạnh Sơn",
   "Mr. Võ Thanh Tùng",
   "Mr. Phan Hoàng Việt",
-  "Mr. Huỳnh Vỹ Lạc",
   "Mr. Nguyễn Trí Dũng",
   "Ms. Trương Thị Loan",
   "Ms. Nguyễn Hồng Thắm",
-  "Ms. Nguyễn Thị Hồng Hảo"
+  "Mr. Bùi Minh Phán",
+  "Mr. Nguyễn Bá Lượng",
+  "Ms. Đoàn Nguyệt Hoa",
+  "Ms. Nguyễn Thị Xinh"
 ];
 
 const SAMPLE_PARTICIPANTS_35 = SAMPLE_PARTICIPANTS_63;
