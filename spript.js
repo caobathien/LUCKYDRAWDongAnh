@@ -5,10 +5,9 @@
  * ====================================================================
  */
 
-/// Official Participants List (59 Participants verified from 6 images)
-// Dòng 10 - 44: Nhóm Giáo viên (35 người)
-// Dòng 45 trở đi: Nhóm Khách mời (34 người)
-const TEACHER_PARTICIPANTS = [
+const ENABLE_CO_CAU_GIAI_THUONG = false;
+
+const GO_VAP_PARTICIPANTS = [
   "Mr. Lê Văn Đại Điền",
   "Ms. Cao Tiểu Phương",
   "Mr. Phạm Anh Tuyến",
@@ -26,7 +25,10 @@ const TEACHER_PARTICIPANTS = [
   "Mr. Adrian",
   "Ms. Nguyễn Thuý Nga",
   "Ms. Trần Phạm Thảo My",
-  "Ms. Nguyễn Thị Thu Hà",
+  "Ms. Nguyễn Thị Thu Hà"
+];
+
+const GO_XOAI_PARTICIPANTS = [
   "Ms. Hồ Thị Mai",
   "Mr. Đặng Thanh Duy",
   "Ms. Lương Ái Mỹ Tiên",
@@ -55,7 +57,8 @@ function normalizeVietnameseName(name) {
     .replace(/[^a-z0-9]/g, '');
 }
 
-const TEACHER_NAMES_SET = new Set(TEACHER_PARTICIPANTS.map(normalizeVietnameseName));
+const GO_VAP_NAMES_SET = new Set(GO_VAP_PARTICIPANTS.map(normalizeVietnameseName));
+const GO_XOAI_NAMES_SET = new Set(GO_XOAI_PARTICIPANTS.map(normalizeVietnameseName));
 
 const SAMPLE_PARTICIPANTS_63 = [
   "Mr. Lê Văn Đại Điền",
@@ -151,6 +154,7 @@ class LuckyDrawEngine {
     ];
     this.currentPrizeIndex = 0;
     this.currentPrize = this.presetPrizes[0];
+    this.kkFirstTwo = Math.random() < 0.5 ? ['KHACH_MOI', 'GO_VAP'] : ['GO_VAP', 'KHACH_MOI'];
 
     // Animation / Spin Handles
     this.spinInterval = null;
@@ -1109,9 +1113,19 @@ class LuckyDrawEngine {
     hop();
   }
 
-  isTeacher(name) {
+  isGoVap(name) {
     if (!name) return false;
-    return TEACHER_NAMES_SET.has(normalizeVietnameseName(name));
+    return GO_VAP_NAMES_SET.has(normalizeVietnameseName(name));
+  }
+
+  isGoXoai(name) {
+    if (!name) return false;
+    return GO_XOAI_NAMES_SET.has(normalizeVietnameseName(name));
+  }
+
+  isKhachMoi(name) {
+    if (!name) return false;
+    return !this.isGoVap(name) && !this.isGoXoai(name);
   }
 
   isCaoTieuPhuong(name) {
@@ -1120,10 +1134,17 @@ class LuckyDrawEngine {
     return clean.includes('cao tieu phuong');
   }
 
-  isPrizeGiaiNhi(prize) {
-    if (!prize) return false;
+  getPrizeType(prize) {
+    if (!prize) return 'OTHER';
     const p = prize.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-    return p.includes('NHI') || p.includes('GIAI 2') || p.includes('GIAI NHI');
+    if (p.includes('KHUYEN KHICH (1/3)') || p.includes('KK 1') || p.includes('KK1') || p.includes('1/3')) return 'KK_1';
+    if (p.includes('KHUYEN KHICH (2/3)') || p.includes('KK 2') || p.includes('KK2') || p.includes('2/3')) return 'KK_2';
+    if (p.includes('KHUYEN KHICH (3/3)') || p.includes('KK 3') || p.includes('KK3') || p.includes('3/3')) return 'KK_3';
+    if (p.includes('KHUYEN KHICH')) return 'KK_OTHER';
+    if (p.includes('NHI') || p.includes('GIAI 2') || p.includes('GIAI NHI')) return 'GIAI_2';
+    if (p.includes('GIAI BA') || p.includes('GIAI 3') || p.includes('BA')) return 'GIAI_3';
+    if (p.includes('NHAT') || p.includes('GIAI 1') || p.includes('GIAI NHAT') || p.includes('DAC BIET')) return 'GIAI_1';
+    return 'OTHER';
   }
 
   /* -------------------------------------------------------------
@@ -1152,44 +1173,58 @@ class LuckyDrawEngine {
       this.countdownWatermark.classList.add('active');
       this.countdownWatermark.textContent = '05.00';
     }
-    const ENABLE_CO_CAU_GIAI_NHI = false;
-    const teacherIndices = [];
-    this.participants.forEach((p, idx) => {
-      if (this.isTeacher(p.name)) {
-        teacherIndices.push(idx);
-      }
-    });
 
-    const isGiaiNhi = this.isPrizeGiaiNhi(this.currentPrize);
     const caoIdx = this.participants.findIndex(p => this.isCaoTieuPhuong(p.name));
+    const prizeType = this.getPrizeType(this.currentPrize);
+    const isGiaiNhiSpecial = ENABLE_CO_CAU_GIAI_THUONG && prizeType === 'GIAI_2' && caoIdx !== -1;
 
     let winnerIndex;
 
-    if (ENABLE_CO_CAU_GIAI_NHI) {
-      if (isGiaiNhi && caoIdx !== -1) {
+    if (ENABLE_CO_CAU_GIAI_THUONG) {
+      if (isGiaiNhiSpecial) {
         winnerIndex = caoIdx;
       } else {
-        const nonCaoTeachers = teacherIndices.filter(idx => idx !== caoIdx);
-        if (nonCaoTeachers.length > 0) {
-          winnerIndex = nonCaoTeachers[Math.floor(Math.random() * nonCaoTeachers.length)];
-        } else {
-          const nonCaoIndices = [];
+        let targetGroup = 'ANY';
+        if (prizeType === 'KK_1') targetGroup = this.kkFirstTwo[0];
+        else if (prizeType === 'KK_2') targetGroup = this.kkFirstTwo[1];
+        else if (prizeType === 'KK_3') targetGroup = 'GO_XOAI';
+        else if (prizeType === 'KK_OTHER') {
+          const kkWinners = this.winners.filter(w => this.getPrizeType(w.prize).startsWith('KK_'));
+          const hasKm = kkWinners.some(w => this.isKhachMoi(w.name));
+          const hasGv = kkWinners.some(w => this.isGoVap(w.name));
+          const remaining = [];
+          if (!hasKm) remaining.push('KHACH_MOI');
+          if (!hasGv) remaining.push('GO_VAP');
+          targetGroup = remaining.length > 0
+            ? remaining[Math.floor(Math.random() * remaining.length)]
+            : 'GO_XOAI';
+        }
+        else if (prizeType === 'GIAI_3') targetGroup = 'GO_XOAI';
+        else if (prizeType === 'GIAI_1') targetGroup = 'GO_VAP';
+
+        let candidateIndices = [];
+        this.participants.forEach((p, idx) => {
+          if (idx === caoIdx) return;
+          if (targetGroup === 'KHACH_MOI' && this.isKhachMoi(p.name)) candidateIndices.push(idx);
+          else if (targetGroup === 'GO_VAP' && this.isGoVap(p.name)) candidateIndices.push(idx);
+          else if (targetGroup === 'GO_XOAI' && this.isGoXoai(p.name)) candidateIndices.push(idx);
+          else if (targetGroup === 'ANY') candidateIndices.push(idx);
+        });
+
+        if (candidateIndices.length === 0) {
           this.participants.forEach((p, idx) => {
-            if (idx !== caoIdx) nonCaoIndices.push(idx);
+            if (idx !== caoIdx) candidateIndices.push(idx);
           });
-          if (nonCaoIndices.length > 0) {
-            winnerIndex = nonCaoIndices[Math.floor(Math.random() * nonCaoIndices.length)];
-          } else {
-            winnerIndex = caoIdx;
-          }
+        }
+
+        if (candidateIndices.length > 0) {
+          winnerIndex = candidateIndices[Math.floor(Math.random() * candidateIndices.length)];
+        } else {
+          winnerIndex = Math.floor(Math.random() * this.participants.length);
         }
       }
     } else {
-      if (teacherIndices.length > 0) {
-        winnerIndex = teacherIndices[Math.floor(Math.random() * teacherIndices.length)];
-      } else {
-        winnerIndex = Math.floor(Math.random() * this.participants.length);
-      }
+      winnerIndex = Math.floor(Math.random() * this.participants.length);
     }
 
     this.chosenWinner = this.participants[winnerIndex];
@@ -1204,7 +1239,7 @@ class LuckyDrawEngine {
       1.18, 1.20, 1.24, 1.28, 1.32, 1.38, 1.45, 1.52, 1.60, 1.75
     ];
 
-    if (ENABLE_CO_CAU_GIAI_NHI && isGiaiNhi && caoIdx !== -1) {
+    if (isGiaiNhiSpecial) {
       delaySteps = [
         80, 80, 85, 90, 95, 100, 110, 120, 135, 150,
         170, 195, 225, 260, 310, 380, 480, 680, 1155, 100
@@ -1220,7 +1255,7 @@ class LuckyDrawEngine {
     let lastIdx = this.currentBeamIndex;
 
     // BƯỚC 3: Xây dựng lộ trình nhảy kịch tính trong 5 giây giảm tốc
-    if (ENABLE_CO_CAU_GIAI_NHI && isGiaiNhi && caoIdx !== -1) {
+    if (isGiaiNhiSpecial) {
       const otherIndices = [];
       this.participants.forEach((p, idx) => {
         if (idx !== caoIdx) otherIndices.push(idx);
