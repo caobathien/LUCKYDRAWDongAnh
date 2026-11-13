@@ -117,7 +117,6 @@ const SAMPLE_PARTICIPANTS_63 = [
   "Ms. Nguyễn Thị Thuý Cẩm",
   "Ms. Trần Thị Nguỳ",
   "Ms. Võ Thị Diễm",
-  "Ms. Huỳnh Thị Cẩm Tú",
   "Ms. Nguyễn Thị Thu Hiền",
   "Ms. Phạm Thu Thảo",
   "Ms. Nguyễn Thị Hường",
