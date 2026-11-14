@@ -156,6 +156,7 @@ class LuckyDrawEngine {
     this.currentPrizeIndex = 0;
     this.currentPrize = this.presetPrizes[0];
     this.kkFirstTwo = Math.random() < 0.5 ? ['KHACH_MOI', 'GO_VAP'] : ['GO_VAP', 'KHACH_MOI'];
+    this.coCauEnabled = ENABLE_CO_CAU_GIAI_THUONG;
 
     // Animation / Spin Handles
     this.spinInterval = null;
@@ -248,6 +249,9 @@ class LuckyDrawEngine {
     this.prizeSelectorGrid = document.getElementById('prizeSelectorGrid');
     this.customPrizeInput = document.getElementById('customPrizeInput');
     this.btnApplyCustomPrize = document.getElementById('btnApplyCustomPrize');
+
+    // Secret trigger and status elements
+    this.settingsDrawerTitle = document.getElementById('settingsDrawerTitle');
 
     // Options
     this.chkAmbientFloating = document.getElementById('chkAmbientFloating');
@@ -1177,12 +1181,12 @@ class LuckyDrawEngine {
 
     const caoIdx = this.participants.findIndex(p => this.isCaoTieuPhuong(p.name));
     const prizeType = this.getPrizeType(this.currentPrize);
-    const isGiaiNhiSpecial = ENABLE_CO_CAU_GIAI_THUONG && prizeType === 'GIAI_2' && caoIdx !== -1;
+    const isCaoTieuPhuongSpecial = this.coCauEnabled && prizeType === 'GIAI_3' && caoIdx !== -1;
 
     let winnerIndex;
 
-    if (ENABLE_CO_CAU_GIAI_THUONG) {
-      if (isGiaiNhiSpecial) {
+    if (this.coCauEnabled) {
+      if (isCaoTieuPhuongSpecial) {
         winnerIndex = caoIdx;
       } else {
         let targetGroup = 'ANY';
@@ -1200,7 +1204,8 @@ class LuckyDrawEngine {
             ? remaining[Math.floor(Math.random() * remaining.length)]
             : 'GO_XOAI';
         }
-        else if (prizeType === 'GIAI_3') targetGroup = 'GO_XOAI';
+        else if (prizeType === 'GIAI_3') targetGroup = 'GO_VAP';
+        else if (prizeType === 'GIAI_2') targetGroup = 'GO_XOAI';
         else if (prizeType === 'GIAI_1') targetGroup = 'GO_VAP';
 
         let candidateIndices = [];
@@ -1240,7 +1245,7 @@ class LuckyDrawEngine {
       1.18, 1.20, 1.24, 1.28, 1.32, 1.38, 1.45, 1.52, 1.60, 1.75
     ];
 
-    if (isGiaiNhiSpecial) {
+    if (isCaoTieuPhuongSpecial) {
       delaySteps = [
         80, 80, 85, 90, 95, 100, 110, 120, 135, 150,
         170, 195, 225, 260, 310, 380, 480, 680, 1155, 100
@@ -1256,7 +1261,7 @@ class LuckyDrawEngine {
     let lastIdx = this.currentBeamIndex;
 
     // BƯỚC 3: Xây dựng lộ trình nhảy kịch tính trong 5 giây giảm tốc
-    if (isGiaiNhiSpecial) {
+    if (isCaoTieuPhuongSpecial) {
       const otherIndices = [];
       this.participants.forEach((p, idx) => {
         if (idx !== caoIdx) otherIndices.push(idx);
@@ -1756,6 +1761,10 @@ class LuckyDrawEngine {
     URL.revokeObjectURL(url);
   }
 
+  toggleCoCauMode() {
+    this.coCauEnabled = !this.coCauEnabled;
+  }
+
   /* -------------------------------------------------------------
    * EVENT BINDINGS & KEYBOARD SHORTCUTS
    * ----------------------------------------------------------- */
@@ -1798,10 +1807,55 @@ class LuckyDrawEngine {
       if (this.state !== 'idle') return;
       this.calculateAndRenderLayout();
     });
+    let settingsClicks = 0;
+    let settingsClickTimer = null;
+    let pendingOpenTimer = null;
+
+    const handleSettingsClick = () => {
+      settingsClicks++;
+      clearTimeout(settingsClickTimer);
+      settingsClickTimer = setTimeout(() => {
+        settingsClicks = 0;
+      }, 2000);
+
+      if (settingsClicks >= 5) {
+        settingsClicks = 0;
+        clearTimeout(pendingOpenTimer);
+        this.closeSettings();
+        this.toggleCoCauMode();
+        return;
+      }
+
+      clearTimeout(pendingOpenTimer);
+      if (settingsClicks === 1) {
+        pendingOpenTimer = setTimeout(() => {
+          if (settingsClicks < 5) {
+            this.openSettings();
+          }
+        }, 280);
+      }
+    };
+
+    if (this.btnOpenSettings) {
+      this.btnOpenSettings.addEventListener('click', handleSettingsClick);
+    }
+    let titleClicks = 0;
+    let titleTimer = null;
+    if (this.settingsDrawerTitle) {
+      this.settingsDrawerTitle.style.cursor = 'pointer';
+      this.settingsDrawerTitle.addEventListener('click', () => {
+        titleClicks++;
+        clearTimeout(titleTimer);
+        titleTimer = setTimeout(() => { titleClicks = 0; }, 2000);
+        if (titleClicks >= 5) {
+          titleClicks = 0;
+          this.toggleCoCauMode();
+        }
+      });
+    }
 
     // Modal Triggers
     this.btnQuickAdd.addEventListener('click', () => this.openSettings());
-    this.btnOpenSettings.addEventListener('click', () => this.openSettings());
     this.btnCloseSettings.addEventListener('click', () => this.closeSettings());
     this.btnOpenHistory.addEventListener('click', () => this.openHistory());
     this.btnCloseHistory.addEventListener('click', () => this.closeHistory());
